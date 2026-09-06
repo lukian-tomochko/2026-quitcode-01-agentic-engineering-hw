@@ -1,0 +1,11 @@
+/*
+ * Global resets and typography come from
+ * `@porsche-design-system/components-react/index.css` (imported in main.tsx).
+ * Only the page canvas is set here.
+ */
+
+body {
+  background: var(--p-color-canvas);
+  color: var(--p-color-primary);
+  min-height: 100svh;
+}

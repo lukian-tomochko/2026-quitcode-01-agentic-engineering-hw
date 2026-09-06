@@ -1,0 +1,429 @@
+/*
+ * Layout only. Every colour, space, radius and font value comes from a PDS
+ * token — no bespoke design values live here.
+ */
+
+.app {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: var(--p-spacing-fluid-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-fluid-md);
+}
+
+.app__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--p-spacing-static-sm);
+}
+
+.app__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-fluid-sm);
+}
+
+.stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-spacing-static-sm);
+}
+
+.habit-name {
+  display: flex;
+  align-items: center;
+  gap: var(--p-spacing-static-sm);
+}
+
+.habits-view__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--p-spacing-static-sm);
+}
+
+.row-actions {
+  display: flex;
+  gap: var(--p-spacing-static-md);
+}
+
+.habit-form,
+.mood-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-fluid-sm);
+}
+
+.mood-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-spacing-static-sm);
+}
+
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-spacing-static-sm);
+}
+
+.settings__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-spacing-static-sm);
+  margin-block-start: var(--p-spacing-static-sm);
+}
+
+.day-head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+/* Drives the toggle icon colour, which PButtonPure inherits via color="inherit". */
+.check-mark {
+  display: flex;
+  justify-content: center;
+  color: var(--p-color-contrast-low);
+  transition: color var(--p-duration-sm) var(--p-ease-in-out);
+}
+
+.check-mark--done {
+  color: var(--p-color-success);
+}
+
+.check-mark:hover {
+  color: var(--p-color-contrast-high);
+}
+
+.check-mark--done:hover {
+  color: var(--p-color-success-medium);
+}
+
+/* ------------------------------------------------------ Mood v.2 --------- */
+
+.moodv2 {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-fluid-sm);
+}
+
+.moodv2__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-fluid-sm);
+}
+
+/*
+ * Hero card. `--moodv2-valence` (1..5) picks the accent colour and
+ * `--moodv2-energy` (1..5) sets the pulse speed, both written by the component
+ * as inline custom properties so no colour or duration is hard-coded here.
+ */
+.moodv2-hero {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p-spacing-fluid-sm);
+  padding: var(--p-spacing-fluid-sm) var(--p-spacing-fluid-md);
+  border-radius: var(--p-radius-lg);
+  background: var(--p-color-surface);
+  box-shadow: var(--p-shadow-sm);
+  overflow: hidden;
+
+  /* Accent, stepped by valence. Falls back to neutral at the middle value. */
+  --moodv2-accent: var(--p-color-info);
+  --moodv2-accent-soft: var(--p-color-info-frosted-soft);
+  /* 2.8s at "wired", 4.4s at "drained" — activation you can see. */
+  --moodv2-pulse: calc(4.8s - var(--moodv2-energy, 3) * 0.4s);
+}
+
+/*
+ * Accent per valence step, selected by a class the component appends rather
+ * than by matching the inline style string — CSS cannot branch on a custom
+ * property value, and attribute matching on `style` depends on how the browser
+ * happens to serialize it.
+ */
+.moodv2-hero--v1 {
+  --moodv2-accent: var(--p-color-error);
+  --moodv2-accent-soft: var(--p-color-error-frosted-soft);
+}
+
+.moodv2-hero--v2 {
+  --moodv2-accent: var(--p-color-warning);
+  --moodv2-accent-soft: var(--p-color-warning-frosted-soft);
+}
+
+.moodv2-hero--v4,
+.moodv2-hero--v5 {
+  --moodv2-accent: var(--p-color-success);
+  --moodv2-accent-soft: var(--p-color-success-frosted-soft);
+}
+
+.moodv2-hero__halo {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--p-spacing-fluid-md);
+  width: 8rem;
+  aspect-ratio: 1;
+  translate: -1.5rem -50%;
+  border-radius: var(--p-radius-full);
+  background: radial-gradient(
+    circle,
+    var(--moodv2-accent-soft) 0%,
+    transparent 70%
+  );
+  animation: moodv2-breathe var(--moodv2-pulse) var(--p-ease-in-out) infinite;
+  pointer-events: none;
+}
+
+.moodv2-hero__face {
+  position: relative;
+  font-size: var(--p-typescale-4xl);
+  line-height: 1;
+  /* Emoji only, so no PDS typeface is overridden. */
+  animation: moodv2-pop var(--p-duration-lg) var(--p-ease-out);
+}
+
+.moodv2-hero__face--flash {
+  animation:
+    moodv2-cheer 700ms var(--p-ease-out),
+    moodv2-bob var(--moodv2-pulse) var(--p-ease-in-out) 700ms infinite;
+}
+
+.moodv2-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-static-2xs);
+  flex: 1 1 14rem;
+}
+
+/*
+ * Pinned inside the hero instead of stacked above the controls: a banner that
+ * appears and then disappears in the form's own flow would shift every control
+ * under the user's cursor, twice.
+ */
+.moodv2-hero__flash {
+  position: absolute;
+  inset-block-start: var(--p-spacing-static-sm);
+  inset-inline-end: var(--p-spacing-static-sm);
+  animation: moodv2-rise var(--p-duration-md) var(--p-ease-out);
+}
+
+.moodv2__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--p-spacing-static-md);
+}
+
+/* Drivers: a checkbox row, reset from the browser's fieldset defaults. */
+.moodv2-drivers {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-static-sm);
+}
+
+.moodv2-drivers__legend {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-static-2xs);
+}
+
+.moodv2-drivers__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--p-spacing-static-sm) var(--p-spacing-static-lg);
+}
+
+.moodv2-drivers__item {
+  flex: 0 0 auto;
+}
+
+/* Trend: sparkline over the emoji strip, both on the same day axis. */
+.moodv2-trend {
+  display: flex;
+  flex-direction: column;
+  gap: var(--p-spacing-static-xs);
+  padding: var(--p-spacing-fluid-sm);
+  border-radius: var(--p-radius-lg);
+  background: var(--p-color-surface);
+  /*
+   * Fourteen day columns stop being legible below ~34px each. Rather than let
+   * the weekday labels collide on a phone, the card scrolls as a unit — the
+   * same `--moodv2-trend-width` floor on both children is what keeps each point
+   * of the line above its own face.
+   */
+  --moodv2-trend-width: 30rem;
+  overflow-x: auto;
+}
+
+.moodv2-trend__chart {
+  width: 100%;
+  min-width: var(--moodv2-trend-width);
+  height: 5rem;
+  overflow: visible;
+}
+
+.moodv2-trend__line {
+  fill: none;
+  stroke: var(--p-color-primary);
+  /* In device pixels, because `preserveAspectRatio: none` stretches the viewBox
+   * unevenly and a scaled stroke would come out thin horizontally, fat
+   * vertically. */
+  vector-effect: non-scaling-stroke;
+  stroke-width: 2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* Drawn in on mount; the dash length is generous so any path length works. */
+  stroke-dasharray: 400;
+  animation: moodv2-draw 1.2s var(--p-ease-out) forwards;
+}
+
+.moodv2-trend__area {
+  fill: var(--p-color-contrast-lower);
+  fill-opacity: 0.55;
+}
+
+.moodv2-strip {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: var(--moodv2-trend-width);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--p-spacing-static-2xs);
+}
+
+.moodv2-strip__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--p-spacing-static-2xs);
+  text-align: center;
+  animation: moodv2-rise var(--p-duration-lg) var(--p-ease-out) backwards;
+}
+
+.moodv2-strip__face {
+  font-size: var(--p-typescale-xl);
+  line-height: 1.2;
+  transition: scale var(--p-duration-sm) var(--p-ease-out);
+}
+
+.moodv2-strip__face:hover {
+  scale: 1.35;
+}
+
+.moodv2-strip__face--empty {
+  color: var(--p-color-contrast-low);
+  font-size: var(--p-typescale-lg);
+}
+
+.moodv2-history__state {
+  display: flex;
+  align-items: center;
+  gap: var(--p-spacing-static-xs);
+}
+
+@keyframes moodv2-pop {
+  from {
+    scale: 0.6;
+    rotate: -8deg;
+  }
+  60% {
+    scale: 1.12;
+  }
+  to {
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes moodv2-cheer {
+  0% {
+    scale: 1;
+  }
+  30% {
+    scale: 1.35;
+    rotate: -10deg;
+  }
+  60% {
+    scale: 1.1;
+    rotate: 10deg;
+  }
+  100% {
+    scale: 1;
+    rotate: 0deg;
+  }
+}
+
+@keyframes moodv2-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -0.35rem;
+  }
+}
+
+@keyframes moodv2-breathe {
+  0%,
+  100% {
+    scale: 0.85;
+    opacity: 0.75;
+  }
+  50% {
+    scale: 1.1;
+    opacity: 1;
+  }
+}
+
+@keyframes moodv2-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes moodv2-draw {
+  from {
+    stroke-dashoffset: 400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Motion here is decoration, so it goes away entirely when asked to. */
+@media (prefers-reduced-motion: reduce) {
+  .moodv2-hero__halo,
+  .moodv2-hero__face,
+  .moodv2-hero__face--flash,
+  .moodv2-hero__flash,
+  .moodv2-strip__day,
+  .moodv2-trend__line {
+    animation: none;
+  }
+
+  .moodv2-strip__face:hover {
+    scale: 1;
+  }
+
+  .moodv2-trend__line {
+    stroke-dasharray: none;
+  }
+}
