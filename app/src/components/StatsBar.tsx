@@ -22,7 +22,7 @@ export function StatsBar({ habits, days, today }: Props) {
 
   // Longest streak still running right now — not an all-time record.
   const topStreak = habits.reduce(
-    (max, h) => Math.max(max, currentStreak(h.checkIns)),
+    (max, h) => Math.max(max, currentStreak(h.checkIns, today)),
     0,
   )
 

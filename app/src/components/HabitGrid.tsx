@@ -56,7 +56,7 @@ export function HabitGrid({ habits, days, today, onToggle }: Props) {
       <PTableBody>
         {habits.map((habit) => {
           const done = new Set(habit.checkIns)
-          const streak = currentStreak(habit.checkIns)
+          const streak = currentStreak(habit.checkIns, today)
 
           return (
             <PTableRow key={habit.id}>

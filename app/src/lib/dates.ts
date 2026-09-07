@@ -48,10 +48,16 @@ export function longDateLabel(iso: IsoDate): string {
 /**
  * Consecutive checked-off days ending today. A habit not yet done *today* keeps
  * its streak until the day is over, so counting starts at yesterday in that case.
+ *
+ * `today` is required on purpose. It used to default to `new Date()`, which let
+ * callers silently read the system clock while the rest of the UI worked from
+ * the day App captured — so after midnight the grid and the streaks disagreed.
+ * Making it explicit turns that into a compile error instead of a wrong number.
  */
-export function currentStreak(checkIns: IsoDate[], today = new Date()): number {
+export function currentStreak(checkIns: IsoDate[], today: IsoDate): number {
   const done = new Set(checkIns)
-  let cursor = done.has(toIsoDate(today)) ? today : addDays(today, -1)
+  let cursor = fromIsoDate(today)
+  if (!done.has(today)) cursor = addDays(cursor, -1)
   let streak = 0
 
   while (done.has(toIsoDate(cursor))) {

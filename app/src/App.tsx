@@ -19,6 +19,7 @@ import {
   toggleCheckIn,
   type HabitDraft,
 } from './lib/habits'
+import { clearMoods } from './lib/moodV2'
 import { loadHabits, saveHabits } from './lib/storage'
 import { createMockHabits } from './mockHabits'
 import type { IsoDate } from './types'
@@ -36,9 +37,24 @@ const TABS = ['Overview', 'Habits', 'Mood', 'Mood v.2', 'Settings'] as const
 function App() {
   const [activeTab, setActiveTab] = useState(0)
 
-  // One clock reading for the whole mount, so the grid columns and the seeded
-  // check-ins can never straddle midnight.
-  const [now] = useState(() => new Date())
+  // One clock reading shared by every date-aware child, so the grid columns and
+  // the streaks can never disagree about which day it is.
+  const [now, setNow] = useState(() => new Date())
+
+  /*
+   * ...but a reading taken at mount goes stale: a tab left open overnight kept
+   * showing yesterday. Re-read the clock just after the next local midnight,
+   * which reschedules itself because `now` is the dependency.
+   */
+  useEffect(() => {
+    const nextMidnight = new Date(now)
+    nextMidnight.setHours(24, 0, 0, 0)
+    // A second of slack so the timer cannot fire a hair before the day flips.
+    const delay = nextMidnight.getTime() - now.getTime() + 1_000
+
+    const timer = setTimeout(() => setNow(new Date()), delay)
+    return () => clearTimeout(timer)
+  }, [now])
 
   // `loadHabits` returns null only when nothing is stored. A stored empty array
   // means the user cleared everything, so it must not bring the demo data back.
@@ -79,7 +95,18 @@ function App() {
     setHabits((current) => removeHabit(current, habitId))
   }, [])
 
-  const handleClearAll = useCallback(() => setHabits([]), [])
+  /*
+   * Mood v.2 keeps its own localStorage key, so clearing habits alone left it
+   * behind. Bumping `dataVersion` remounts the mood view so it re-reads the
+   * emptied store immediately, instead of only after a reload.
+   */
+  const [dataVersion, setDataVersion] = useState(0)
+
+  const handleClearAll = useCallback(() => {
+    clearMoods()
+    setHabits([])
+    setDataVersion((version) => version + 1)
+  }, [])
 
   return (
     <main className="app">
@@ -140,6 +167,7 @@ function App() {
         {activeTab === 1 && (
           <HabitsView
             habits={habits}
+            today={today}
             onAdd={handleAdd}
             onEdit={handleEdit}
             onDelete={handleDelete}
@@ -148,7 +176,9 @@ function App() {
 
         {activeTab === 2 && <MoodView today={today} />}
 
-        {activeTab === 3 && <MoodV2View today={today} />}
+        {activeTab === 3 && (
+          <MoodV2View key={dataVersion} today={today} />
+        )}
 
         {activeTab === 4 && (
           <SettingsView habits={habits} onClearAll={handleClearAll} />

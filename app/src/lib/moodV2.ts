@@ -286,6 +286,29 @@ export function saveMoods(entries: MoodV2Entry[]): boolean {
   }
 }
 
+/**
+ * Wipes the mood store. Needed because "Clear all data" in Settings used to
+ * reset habits only, leaving this second key untouched and the mood history
+ * alive after the user had been told everything was deleted.
+ *
+ * Unlike the habit store, removing the key here is safe: MoodV2View is
+ * unmounted while Settings is open, so no persistence effect races this write.
+ */
+export function clearMoods(): boolean {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Bytes the mood store will occupy, for the Settings summary. */
+export function serializedMoodSize(entries: MoodV2Entry[]): number {
+  const payload: StoredPayload = { version: SCHEMA_VERSION, entries }
+  return JSON.stringify(payload).length
+}
+
 /** Insert or replace the entry for `entry.day`, newest day first. */
 export function upsertEntry(
   entries: MoodV2Entry[],

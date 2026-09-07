@@ -19,10 +19,12 @@ import { HabitFormModal } from './HabitFormModal'
 import { currentStreak } from '../lib/dates'
 import type { HabitDraft } from '../lib/habits'
 import { HABIT_ICONS } from '../habitIcons'
-import type { Habit } from '../types'
+import type { Habit, IsoDate } from '../types'
 
 type Props = {
   habits: Habit[]
+  /** The day App captured — shared with the grid so streaks cannot disagree. */
+  today: IsoDate
   onAdd: (draft: HabitDraft) => void
   onEdit: (habitId: string, draft: HabitDraft) => void
   onDelete: (habitId: string) => void
@@ -31,7 +33,13 @@ type Props = {
 const categoryLabel = (habit: Habit) =>
   HABIT_ICONS.find((option) => option.value === habit.icon)?.label ?? '—'
 
-export function HabitsView({ habits, onAdd, onEdit, onDelete }: Props) {
+export function HabitsView({
+  habits,
+  today,
+  onAdd,
+  onEdit,
+  onDelete,
+}: Props) {
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState<Habit | null>(null)
   const [deleting, setDeleting] = useState<Habit | null>(null)
@@ -102,7 +110,10 @@ export function HabitsView({ habits, onAdd, onEdit, onDelete }: Props) {
           </PTableHead>
 
           <PTableBody>
-            {habits.map((habit) => (
+            {habits.map((habit) => {
+              const streak = currentStreak(habit.checkIns, today)
+
+              return (
               <PTableRow key={habit.id}>
                 <PTableCell>
                   <span className="habit-name">
@@ -119,11 +130,9 @@ export function HabitsView({ habits, onAdd, onEdit, onDelete }: Props) {
                 <PTableCell>
                   <PTag
                     compact
-                    variant={
-                      currentStreak(habit.checkIns) > 0 ? 'success' : 'secondary'
-                    }
+                    variant={streak > 0 ? 'success' : 'secondary'}
                   >
-                    {`${currentStreak(habit.checkIns)}d`}
+                    {`${streak}d`}
                   </PTag>
                 </PTableCell>
                 <PTableCell>
@@ -149,7 +158,8 @@ export function HabitsView({ habits, onAdd, onEdit, onDelete }: Props) {
                   </span>
                 </PTableCell>
               </PTableRow>
-            ))}
+              )
+            })}
           </PTableBody>
         </PTable>
       )}
